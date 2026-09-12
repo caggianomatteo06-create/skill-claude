@@ -9,9 +9,11 @@ description: >
   ricavare appunti, riassunti, schemi o mappe da una registrazione, ritrovare un riferimento o un
   nome citato a lezione, sapere cosa c'è da consegnare, organizzare il materiale di un corso o di
   un esame, oppure chiede come registrare le lezioni, con che attrezzatura, o come seguirle in
-  diretta con un assistente. Copre registrazione, modalità live che avvisa quando il docente
-  mostra qualcosa o annuncia una consegna, trascrizione locale con Whisper, glossario tecnico di
-  moda e tessile, produzione dei materiali di studio e biblioteca consultabile nel browser.
+  diretta con un assistente, e quando chiede cosa deve consegnare, quando cominciare a lavorarci,
+  cosa deve comprare, che media ha o che voto gli serve in un esame futuro. Copre registrazione,
+  modalità live che avvisa quando il docente mostra qualcosa o annuncia una consegna, trascrizione
+  locale con Whisper, glossario tecnico di moda e tessile, produzione dei materiali di studio,
+  biblioteca consultabile nel browser e il piano di scadenze, lezioni, esami, materiali e medie.
 ---
 
 # Lezioni IAAD — Textile & Fashion Design
@@ -60,6 +62,7 @@ piattaforma e si rielabora all'infinito.
 Proporla la prima volta e poi rispettarla:
 
 ```
+piano.json                             # scadenze, orario, esami, materiali, voti
 Lezioni/
   <Corso>/                             # es. Disegno e colore, Semiotica del design
     glossario.md                       # termini e nomi del corso, cresce lezione dopo lezione
@@ -79,6 +82,52 @@ Lezioni/
 ```
 
 Il nome cartella `AAAA-MM-GG-titolo` tiene le lezioni in ordine da solo.
+
+## Il piano
+
+`piano.json` tiene scadenze, orario delle lezioni, esami, materiali da procurare e voti.
+`scripts/piano.py` è il motore che ci ragiona sopra. Modello dei dati campo per campo:
+`references/piano.md`, da leggere prima di toccare il file.
+
+```bash
+python scripts/piano.py init                      # la prima volta
+python scripts/piano.py agenda                    # cosa arriva, e da quando lavorarci
+python scripts/piano.py oggi                      # lezioni di oggi e impegni caldi
+python scripts/piano.py materiali                 # cosa comprare, entro quando ordinarlo
+python scripts/piano.py media                     # media, CFA, proiezione in centodecimi
+python scripts/piano.py serve --obiettivo 27      # che voto serve negli esami che restano
+```
+
+**Il piano lo tiene aggiornato Claude.** Quando l'utente dice "il prof ha detto che per venerdì
+servono tre campioni", o quando la modalità live ha prodotto un avviso 📌, **scrivere la voce nel
+file**, non limitarsi a rispondere. Poi eseguire `piano.py controlla`.
+
+Due idee su cui è costruito, da spiegare la prima volta:
+
+1. **`giorni_lavoro`** su ogni impegno: quanti giorni serve davvero lavorarci. Da lì esce la data
+   entro cui cominciare, ed è ciò che distingue una pianificazione da un calendario. Se l'utente
+   non sa stimarlo, proporre un numero e dire che è una stima.
+2. **`giorni_approvvigionamento`** su ogni materiale: quanto ci mette ad arrivare. La data limite
+   per ordinare è `scadenza − giorni_lavoro − approvvigionamento`, perché il tessuto deve esserci
+   *prima* di iniziare, non il giorno della revisione. È il problema che in una scuola di design
+   fa saltare più consegne di qualsiasi altro.
+
+### Medie
+
+`media` dà ponderata sui CFA, aritmetica, CFA acquisiti e massima media ancora raggiungibile.
+`serve --obiettivo X` dice che voto serve: su tutti i CFA che restano, oppure su un singolo esame
+con `--corso`. Se l'obiettivo non è più raggiungibile lo dice, e riporta il massimo possibile.
+
+Tre regole da non violare:
+
+- **Le idoneità non fanno media** ma contano per i CFA acquisiti. Il campo `valutazione` del corso
+  decide: nel dubbio chiedere, non tirare a indovinare.
+- **La proiezione in centodecimi è solo la media riportata in scala** (`media × 110 / 30`). I punti
+  per tesi, lodi e durata degli studi dipendono dal regolamento dell'istituto: non stimarli.
+- **Quanto vale la lode** è un'impostazione, predefinita a 30. Cambiarla solo se l'utente lo sa.
+
+Chi modifica il motore esegua poi `python scripts/test_piano.py`: verifica la matematica delle
+medie ricalcolandola al contrario, oltre a tempistiche, scritture ed errori del file.
 
 ## Stadio 1 — Registrazione
 
@@ -237,6 +286,10 @@ converte niente, e non espone nulla in rete. Solo libreria standard di Python, n
 
 Chi modifica rendering o rotte esegua poi `.venv/bin/python scripts/test_biblioteca.py`: monta un
 corpus finto, avvia il server e fa richieste HTTP vere.
+
+La biblioteca **non mostra ancora il piano**: per ora scadenze, materiali e medie stanno solo in
+terminale. È una scelta, non una dimenticanza, e l'interfaccia grafica del piano è il passo
+successivo previsto.
 
 ## Se l'utente non vuole installare niente
 
