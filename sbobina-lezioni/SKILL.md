@@ -6,20 +6,25 @@ description: >
   autoverifica e glossario dei termini. Usa SEMPRE questo skill quando l'utente chiede di
   "sbobinare" una lezione, trascrivere un audio o un video di lezione, ricavare appunti, riassunti,
   schemi, mappe o flashcard da una registrazione, organizzare il materiale di un corso o di un
-  esame, oppure chiede come registrare le lezioni per poi elaborarle. Copre la registrazione (cosa
-  registrare e come), la trascrizione in locale con Whisper senza mandare l'audio a terzi, la
-  correzione della terminologia tecnica tramite glossario di corso, e la produzione dei materiali
-  di studio a partire dal testo.
+  esame, oppure chiede come registrare le lezioni, con che attrezzatura, o come seguirle in diretta
+  con un assistente. Copre la scelta di cosa usare per registrare, la modalità live che durante la
+  lezione avvisa quando il docente indica la lavagna o segnala un argomento d'esame, la trascrizione
+  in locale con Whisper senza mandare l'audio a terzi, la correzione della terminologia tecnica
+  tramite glossario di corso, e la produzione dei materiali di studio a partire dal testo.
 ---
 
 # Sbobinare ed elaborare le lezioni universitarie
 
-Pipeline in tre stadi. Ogni stadio produce un **file di testo che resta all'utente**, così il dato
-è sempre riutilizzabile e non resta chiuso dentro una piattaforma.
+Pipeline in tre stadi, più una modalità in diretta opzionale. Ogni stadio produce un **file di
+testo che resta all'utente**, così il dato è sempre riutilizzabile e non resta chiuso dentro una
+piattaforma.
 
 ```
 registrazione audio  →  trascrizione (.md + .srt)  →  materiali di studio (.md, .csv)
      telefono              scripts/trascrivi.py           riassunto, mappa, flashcard, quiz
+        │
+        └─ opzionale, durante la lezione: scripts/lezione_live.py
+           avvisa in diretta su ciò che dal solo audio andrebbe perso
 ```
 
 Il valore sta nello **stadio 3**: la trascrizione grezza di una lezione da due ore è lunga
@@ -41,28 +46,85 @@ Lezioni/
       mappa.md
       flashcard.csv
       quiz.md
+      avvisi.md                      # solo se si è usata la modalità live
+      domande.md
+      schermate/
 ```
 
 Il nome cartella `AAAA-MM-GG-titolo` tiene le lezioni in ordine cronologico da sole.
 
 ## Stadio 1 — Registrazione
 
-Non serve attrezzatura. Consigli da dare quando l'utente chiede come registrare:
+Il telefono sul banco basta quasi sempre. **Quello che si perde non è la qualità audio: è la
+lavagna, le slide e i gesti.** Il docente scrive una formula e dice "questo qui": nella
+trascrizione resta "questo qui", che non significa niente.
 
-- **Registratore vocale del telefono**, telefono sul banco con il microfono verso il docente, non
-  dentro lo zaino e non coperto dalla mano. È la variabile che pesa di più sulla qualità finale.
-- **Formato**: m4a/AAC va benissimo. Un'ora di lezione occupa circa 30–60 MB. Non serve registrare
-  in alta qualità: la trascrizione lavora comunque a 16 kHz mono.
-- **Aula grande o docente che si muove**: un auricolare con microfono appoggiato sul banco, o le
-  cuffie Bluetooth usate come microfono, rendono molto più del microfono interno.
-- **Lezioni online** (Teams, Zoom, Meet): registrare direttamente dalla piattaforma quando è
-  permesso, la traccia è pulita e la trascrizione viene quasi perfetta.
-- **Batteria e spazio**: due ore di registrazione consumano parecchio. Avvisare di controllare prima.
+Scala delle soluzioni, errori pratici che costano una lezione intera e la prova da fare prima di
+fidarsi: `references/registrazione.md`. Leggerlo prima di consigliare attrezzatura.
 
-**Nota da dare sempre all'utente la prima volta, senza farne un caso:** registrare una lezione per
-uso personale di studio è normale, ma il permesso del docente va chiesto e il regolamento d'ateneo
-va rispettato. Registrazioni e trascrizioni non vanno diffuse o rivendute: la lezione è opera del
-docente e in aula ci sono le voci di altre persone.
+**Nota da dare all'utente la prima volta, senza farne un caso:** registrare una lezione per uso
+personale di studio è normale, ma il permesso del docente va chiesto e il regolamento d'ateneo va
+rispettato. Registrazioni e trascrizioni non vanno diffuse: la lezione è opera del docente e in
+aula ci sono le voci di altre persone.
+
+## Stadio 1b — Modalità live (opzionale)
+
+`scripts/lezione_live.py` sta acceso durante la lezione: registra, trascrive a finestre di 25
+secondi e **avvisa nel momento in cui sta succedendo qualcosa che l'audio da solo non conserva**,
+quando c'è ancora tempo per fotografare la lavagna o alzare la mano.
+
+```bash
+# in aula, con un bip quando conviene fotografare la lavagna
+.venv/bin/python scripts/lezione_live.py --uscita "Lezioni/Analisi/2026-09-12-serie" --suono
+
+# lezione online: cattura da sé lo schermo quando il docente indica le slide
+.venv/bin/python scripts/lezione_live.py --uscita "..." --schermo
+
+# prova a freddo su una registrazione già fatta, senza microfono
+.venv/bin/python scripts/lezione_live.py --uscita prova --sorgente vecchia-lezione.m4a --veloce
+```
+
+### Cosa rileva, e come
+
+**Rilevatore locale**, sempre attivo, gratuito, offline, istantaneo. Cerca nel parlato quattro
+famiglie di segnali e un quinto indizio che non viene dalle parole:
+
+| | Segnale | Perché conta |
+|---|---|---|
+| 📸 | "guardate qui", "questa formula", "come vedete" | Sta parlando di qualcosa che si vede e basta: **fotografalo adesso** |
+| ⭐ | "all'esame lo chiedo sempre", "mi raccomando" | Vale più del contenuto stesso |
+| 📖 | "come abbiamo visto la scorsa volta", "sul libro" | Materiale esterno da recuperare |
+| ❓ | "ci siamo?", "domande?" | La finestra per chiedere si apre adesso |
+| ⚠️ | confidenza bassa del modello (`avg_logprob`) | Whisper sta tirando a indovinare: audio da riascoltare |
+
+L'ultima riga è quella che l'utente non si aspetta: il modello dichiara quanto è sicuro di ogni
+segmento, e un crollo di confidenza segnala l'audio degradato **senza bisogno di rileggere nulla**.
+
+Gli avvisi finiscono in `avvisi.md` con timestamp, frase che li ha fatti scattare e, con
+`--schermo`, la schermata catturata in quell'istante.
+
+**Agente Claude**, opzionale, con `--agente`. Ogni cinque minuti rilegge quello che è stato detto
+e scrive in `domande.md`: cosa è stato citato ma non si ricostruisce dall'audio, quali termini
+sono stati usati senza mai definirli, quali domande precise fare al docente adesso, quali
+passaggi sono da riascoltare. Richiede `ANTHROPIC_API_KEY`. Costo indicativo per una lezione da
+due ore, con `claude-opus-5`: circa mezzo dollaro; con `--modello-agente claude-haiku-4-5` circa
+un decimo di dollaro, con analisi più superficiali.
+
+Quando l'utente attiva l'agente, dirgli che le richieste usano la protezione automatica contro
+i rifiuti del modello (`fallbacks`), attiva per impostazione predefinita.
+
+### Due avvertenze da dare sempre
+
+1. **La diretta usa il modello Whisper piccolo**, perché deve stare al passo con il parlato. La
+   sua trascrizione serve a far scattare gli avvisi, non a studiarci. Finita la lezione, **va
+   comunque ripassato `trascrivi.py` sull'audio** con il modello grande: è quella la trascrizione
+   buona. La modalità live salva l'audio integrale in `audio.wav` apposta.
+2. **Non si guarda il terminale durante la lezione.** Il valore è nel bip (`--suono`), nella
+   cattura automatica dello schermo (`--schermo`) e nei file da rileggere dopo. Dirlo chiaramente,
+   altrimenti l'utente si aspetta di doverlo sorvegliare.
+
+Chi modifica le espressioni del rilevatore in `lezione_live.py` deve poi eseguire
+`.venv/bin/python scripts/test_lezione_live.py`: gira senza microfono, senza modello e senza rete.
 
 ## Stadio 2 — Trascrizione
 
