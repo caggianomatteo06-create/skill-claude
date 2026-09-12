@@ -1,246 +1,245 @@
 ---
 name: sbobina-lezioni
 description: >
-  Trasforma le registrazioni delle lezioni universitarie in materiale di studio: trascrizione
-  completa con timestamp, riassunti strutturati, mappe concettuali, flashcard per Anki, quiz di
-  autoverifica e glossario dei termini. Usa SEMPRE questo skill quando l'utente chiede di
-  "sbobinare" una lezione, trascrivere un audio o un video di lezione, ricavare appunti, riassunti,
-  schemi, mappe o flashcard da una registrazione, organizzare il materiale di un corso o di un
-  esame, oppure chiede come registrare le lezioni, con che attrezzatura, o come seguirle in diretta
-  con un assistente. Copre la scelta di cosa usare per registrare, la modalità live che durante la
-  lezione avvisa quando il docente indica la lavagna o segnala un argomento d'esame, la trascrizione
-  in locale con Whisper senza mandare l'audio a terzi, la correzione della terminologia tecnica
-  tramite glossario di corso, e la produzione dei materiali di studio a partire dal testo.
+  Registra ed elabora le lezioni del triennio in Textile & Fashion Design allo IAAD di Torino.
+  Trasforma le registrazioni in materiale di studio: trascrizione con timestamp, riassunti,
+  indice dei riferimenti citati (designer, maison, collezioni, mostre), consegne e scadenze delle
+  revisioni, mappe, glossario tecnico e flashcard per i corsi teorici. Usa SEMPRE questo skill
+  quando l'utente chiede di "sbobinare" una lezione, trascrivere un audio o un video di lezione,
+  ricavare appunti, riassunti, schemi o mappe da una registrazione, ritrovare un riferimento o un
+  nome citato a lezione, sapere cosa c'è da consegnare, organizzare il materiale di un corso o di
+  un esame, oppure chiede come registrare le lezioni, con che attrezzatura, o come seguirle in
+  diretta con un assistente. Copre registrazione, modalità live che avvisa quando il docente
+  mostra qualcosa o annuncia una consegna, trascrizione locale con Whisper, glossario tecnico di
+  moda e tessile, produzione dei materiali di studio e biblioteca consultabile nel browser.
 ---
 
-# Sbobinare ed elaborare le lezioni universitarie
+# Lezioni IAAD — Textile & Fashion Design
 
-Pipeline in tre stadi, più una modalità in diretta opzionale. Ogni stadio produce un **file di
-testo che resta all'utente**, così il dato è sempre riutilizzabile e non resta chiuso dentro una
-piattaforma.
+Skill costruito per un preciso contesto: **triennio in Textile & Fashion Design allo IAAD di
+Torino**, istituzione AFAM, Diploma Accademico di I Livello, 180 CFA, didattica in italiano.
+
+Il corso alterna tre dimensioni: una **analitica** (materie umanistiche che leggono fenomeni e
+tendenze), una **progettuale** (dall'idea al prodotto) e una **espressiva e grafica** (disegno,
+rappresentazione del corpo, colore, software). Le prime chiedono uno studio da esame, le altre
+si valutano su progetto e revisione. Lo skill serve entrambe, ma con output diversi.
+
+## Cosa cambia rispetto a una lezione qualsiasi
+
+Tre fatti da tenere presenti in ogni risposta, perché determinano tutto il resto:
+
+1. **Il contenuto è in gran parte visivo.** Immagini di collezioni, capi appesi, campioni di
+   tessuto che girano per l'aula, tavole alla parete. Una registrazione audio ne conserva quasi
+   nulla: "guardate questo drappeggio" da solo non vale niente.
+2. **Non si studia per un compito scritto, si consegna.** Revisioni, tavole, figurini, formati,
+   scadenze. L'informazione più costosa da perdere è *cosa portare e per quando*.
+3. **Il vocabolario manda in crisi la trascrizione automatica.** Termini francesi e inglesi
+   (prêt-à-porter, pied-de-poule, crêpe de chine, colorway, tech pack) e nomi propri (Vionnet,
+   Schiaparelli, Comme des Garçons, Margiela) escono storpiati sistematicamente.
+
+Da qui discende ogni scelta dello skill. Non trattare queste lezioni come lezioni teoriche: niente
+formule, niente "questo all'esame lo chiede sempre" nei corsi di progetto, niente flashcard dove
+non si viene interrogati.
+
+## La pipeline
 
 ```
-registrazione audio  →  trascrizione (.md + .srt)  →  materiali di studio (.md, .csv)
-     telefono              scripts/trascrivi.py           riassunto, mappa, flashcard, quiz
+registrazione audio  →  trascrizione (.md + .srt)  →  materiali di studio  →  biblioteca
+     telefono              scripts/trascrivi.py        riassunto, riferimenti,   browser
+        │                  + glossario del corso       consegne, mappa
         │
         └─ opzionale, durante la lezione: scripts/lezione_live.py
-           avvisa in diretta su ciò che dal solo audio andrebbe perso
+           avvisa quando fotografare e quando viene annunciata una consegna
 ```
 
-Il valore sta nello **stadio 3**: la trascrizione grezza di una lezione da due ore è lunga
-15.000–20.000 parole e nessuno la rilegge. Quello che si studia è ciò che viene dopo.
+Ogni stadio produce **file che restano all'utente**: il materiale non finisce chiuso dentro una
+piattaforma e si rielabora all'infinito.
 
-## Struttura cartelle consigliata
+## Struttura cartelle
 
-Proporla all'utente la prima volta e poi rispettarla:
+Proporla la prima volta e poi rispettarla:
 
 ```
 Lezioni/
-  <Corso>/
-    glossario.md                     # termini, nomi, sigle del corso (vedi sotto)
+  <Corso>/                             # es. Disegno e colore, Semiotica del design
+    glossario.md                       # termini e nomi del corso, cresce lezione dopo lezione
+    scadenze.md                        # consegne e revisioni del corso, uno solo
     2026-09-12-titolo-lezione/
-      audio.m4a                      # registrazione originale, non cancellarla
-      trascrizione.md                # output stadio 2
+      audio.m4a                        # registrazione originale, non cancellarla
+      trascrizione.md                  # stadio 2
       trascrizione.srt
-      riassunto.md                   # output stadio 3
+      riassunto.md                     # stadio 3
+      riferimenti.md
       mappa.md
-      flashcard.csv
-      quiz.md
-      avvisi.md                      # solo se si è usata la modalità live
+      flashcard.csv                    # solo corsi teorici
+      avvisi.md                        # se si è usata la modalità live
       domande.md
-      schermate/
+      schermate/                       # catturate in automatico
+      foto/                            # scattate col telefono, rinominate hh-mm-ss
 ```
 
-Il nome cartella `AAAA-MM-GG-titolo` tiene le lezioni in ordine cronologico da sole.
+Il nome cartella `AAAA-MM-GG-titolo` tiene le lezioni in ordine da solo.
 
 ## Stadio 1 — Registrazione
 
-Il telefono sul banco basta quasi sempre. **Quello che si perde non è la qualità audio: è la
-lavagna, le slide e i gesti.** Il docente scrive una formula e dice "questo qui": nella
-trascrizione resta "questo qui", che non significa niente.
+Il telefono sul banco basta quasi sempre. **Quello che si perde non è la qualità audio: è il capo,
+il campione, l'immagine sullo schermo.** Scala delle soluzioni, hardware con prezzi, errori che
+costano una lezione intera: `references/registrazione.md`. Leggerlo prima di consigliare acquisti.
 
-Scala delle soluzioni, errori pratici che costano una lezione intera e la prova da fare prima di
-fidarsi: `references/registrazione.md`. Leggerlo prima di consigliare attrezzatura.
-
-**Nota da dare all'utente la prima volta, senza farne un caso:** registrare una lezione per uso
-personale di studio è normale, ma il permesso del docente va chiesto e il regolamento d'ateneo va
-rispettato. Registrazioni e trascrizioni non vanno diffuse: la lezione è opera del docente e in
-aula ci sono le voci di altre persone.
+**Nota da dare la prima volta, senza farne un caso:** chiedere il permesso al docente e rispettare
+il regolamento dell'istituto. Le registrazioni non vanno diffuse: la lezione è opera del docente e
+in aula ci sono le voci di altre persone. Le immagini mostrate sono spesso protette da copyright:
+vanno bene negli appunti personali, non in pubblicazioni.
 
 ## Stadio 1b — Modalità live (opzionale)
 
 `scripts/lezione_live.py` sta acceso durante la lezione: registra, trascrive a finestre di 25
-secondi e **avvisa nel momento in cui sta succedendo qualcosa che l'audio da solo non conserva**,
-quando c'è ancora tempo per fotografare la lavagna o alzare la mano.
+secondi e **avvisa mentre sta succedendo**, quando c'è ancora tempo per fotografare o alzare la
+mano.
 
 ```bash
-# in aula, con un bip quando conviene fotografare la lavagna
-.venv/bin/python scripts/lezione_live.py --uscita "Lezioni/Analisi/2026-09-12-serie" --suono
+# in aula, con un bip quando conviene fotografare
+.venv/bin/python scripts/lezione_live.py --uscita "Lezioni/Disegno e colore/2026-09-12-armonie" --suono
 
-# lezione online: cattura da sé lo schermo quando il docente indica le slide
+# lezione con slide proiettate su un portatile: cattura da sé lo schermo
 .venv/bin/python scripts/lezione_live.py --uscita "..." --schermo
 
 # prova a freddo su una registrazione già fatta, senza microfono
 .venv/bin/python scripts/lezione_live.py --uscita prova --sorgente vecchia-lezione.m4a --veloce
 ```
 
-### Cosa rileva, e come
+### Cosa rileva
 
-**Rilevatore locale**, sempre attivo, gratuito, offline, istantaneo. Cerca nel parlato quattro
-famiglie di segnali e un quinto indizio che non viene dalle parole:
+**Rilevatore locale**, sempre attivo, gratuito, offline, istantaneo:
 
 | | Segnale | Perché conta |
 |---|---|---|
-| 📸 | "guardate qui", "questa formula", "come vedete" | Sta parlando di qualcosa che si vede e basta: **fotografalo adesso** |
-| ⭐ | "all'esame lo chiedo sempre", "mi raccomando" | Vale più del contenuto stesso |
-| 📖 | "come abbiamo visto la scorsa volta", "sul libro" | Materiale esterno da recuperare |
+| 📸 | "guardate questo drappeggio", "toccate la mano del tessuto", "come vedete" | Sta mostrando qualcosa: **fotografalo adesso** |
+| 📌 | "per la prossima volta portate", "la revisione è entro", "in formato" | Consegna annunciata a voce, nessuno la scrive |
+| 🔖 | "guardatevi la collezione", "l'archivio di", "la mostra al" | Nome o fonte da recuperare dopo |
 | ❓ | "ci siamo?", "domande?" | La finestra per chiedere si apre adesso |
-| ⚠️ | confidenza bassa del modello (`avg_logprob`) | Whisper sta tirando a indovinare: audio da riascoltare |
+| ⚠️ | confidenza bassa del modello | Whisper sta tirando a indovinare: da riascoltare |
 
-L'ultima riga è quella che l'utente non si aspetta: il modello dichiara quanto è sicuro di ogni
-segmento, e un crollo di confidenza segnala l'audio degradato **senza bisogno di rileggere nulla**.
+L'ultima riga non viene dalle parole: Whisper dichiara quanto è sicuro di ogni segmento, e un
+crollo di confidenza segnala l'audio degradato senza bisogno di rileggere nulla. Sul vocabolario
+di moda succede spesso, ed è un segnale utile.
 
 Gli avvisi finiscono in `avvisi.md` con timestamp, frase che li ha fatti scattare e, con
 `--schermo`, la schermata catturata in quell'istante.
 
-**Agente Claude**, opzionale, con `--agente`. Ogni cinque minuti rilegge quello che è stato detto
-e scrive in `domande.md`: cosa è stato citato ma non si ricostruisce dall'audio, quali termini
-sono stati usati senza mai definirli, quali domande precise fare al docente adesso, quali
-passaggi sono da riascoltare. Richiede `ANTHROPIC_API_KEY`. Costo indicativo per una lezione da
-due ore, con `claude-opus-5`: circa mezzo dollaro; con `--modello-agente claude-haiku-4-5` circa
-un decimo di dollaro, con analisi più superficiali.
-
-Quando l'utente attiva l'agente, dirgli che le richieste usano la protezione automatica contro
-i rifiuti del modello (`fallbacks`), attiva per impostazione predefinita.
+**Agente Claude**, opzionale, con `--agente`. Ogni cinque minuti rilegge quanto è stato detto e
+scrive in `domande.md`: cosa fotografare, quali riferimenti sono stati nominati, quali consegne
+annunciate, quali termini verificare e quali domande fare al docente adesso. Richiede
+`ANTHROPIC_API_KEY`. Costo indicativo per una lezione da due ore: circa mezzo dollaro con
+`claude-opus-5`, circa un decimo con `--modello-agente claude-haiku-4-5` e analisi più
+superficiali. Le richieste hanno attiva la protezione automatica contro i rifiuti (`fallbacks`).
 
 ### Due avvertenze da dare sempre
 
-1. **La diretta usa il modello Whisper piccolo**, perché deve stare al passo con il parlato. La
-   sua trascrizione serve a far scattare gli avvisi, non a studiarci. Finita la lezione, **va
-   comunque ripassato `trascrivi.py` sull'audio** con il modello grande: è quella la trascrizione
-   buona. La modalità live salva l'audio integrale in `audio.wav` apposta.
-2. **Non si guarda il terminale durante la lezione.** Il valore è nel bip (`--suono`), nella
-   cattura automatica dello schermo (`--schermo`) e nei file da rileggere dopo. Dirlo chiaramente,
-   altrimenti l'utente si aspetta di doverlo sorvegliare.
+1. **La diretta usa il modello Whisper piccolo**, perché deve stare al passo con il parlato. Serve
+   a far scattare gli avvisi, non a studiarci. Finita la lezione **va ripassato `trascrivi.py`**
+   con il modello grande: la modalità live salva l'audio integrale apposta.
+2. **Non si guarda il terminale durante la lezione.** Il valore è nel bip, nelle schermate
+   automatiche e nei file da rileggere dopo.
 
-Chi modifica le espressioni del rilevatore in `lezione_live.py` deve poi eseguire
+Chi modifica le espressioni del rilevatore esegua poi
 `.venv/bin/python scripts/test_lezione_live.py`: gira senza microfono, senza modello e senza rete.
 
 ## Stadio 2 — Trascrizione
 
-Usare `scripts/trascrivi.py`. Gira **in locale** con faster-whisper: nessun file esce dal computer,
-nessun costo per ora di audio, nessun limite mensile.
-
-Prima volta:
-
 ```bash
-bash scripts/setup.sh          # crea .venv e installa faster-whisper
+bash scripts/setup.sh          # una volta sola
+
+.venv/bin/python scripts/trascrivi.py "Lezioni/Disegno e colore/2026-09-12-armonie/audio.m4a" \
+    --glossario "Lezioni/Disegno e colore/glossario.md"
 ```
 
-Poi, per ogni lezione:
+Gira **in locale** con faster-whisper: nessun file esce dal computer, nessun costo a ora, nessun
+limite mensile. Produce `trascrizione.md` (blocchi con timestamp), `trascrizione.srt` e
+`trascrizione.txt`.
 
-```bash
-.venv/bin/python scripts/trascrivi.py "Lezioni/Analisi/2026-09-12-serie-numeriche/audio.m4a" \
-    --glossario "Lezioni/Analisi/glossario.md"
-```
+**Scelta del modello** — `--modello`, default `large-v3-turbo`. Con GPU pochi minuti per un'ora di
+audio; su sola CPU da venti minuti a oltre un'ora; `small` è più veloce ma sui termini tecnici di
+moda sbaglia molto di più, quindi va bene solo per la diretta.
 
-Produce accanto all'audio: `trascrizione.md` (blocchi con timestamp), `trascrizione.srt`
-(sottotitoli, per riascoltare un passaggio) e `trascrizione.txt` (testo continuo).
+### Il glossario: la leva che conta di più
 
-**Scelta del modello** — `--modello`, default `large-v3-turbo`:
+È il punto in cui questo skill si ripaga. Senza glossario, "pied-de-poule" diventa "pié di pull" e
+"Comme des Garçons" diventa "come de garson", in ogni lezione, per tre anni.
 
-| Situazione | Modello | Tempo indicativo per 1h di audio |
+`references/glossario-base.md` è il punto di partenza già pronto: termini tessili, confezione,
+modellistica, progetto, software e nomi ricorrenti. Alla prima lezione di un corso va **copiato
+come `glossario.md` nella cartella del corso e sfoltito**: un glossario di 60 voci giuste rende
+più di uno di 300 generiche.
+
+Whisper legge solo i primi 850 caratteri circa, quindi l'ordine conta: in testa i forestierismi e
+i nomi propri, che sono quelli che sbaglia. Il file intero viene invece usato nello stadio 3, dove
+serve a correggere ciò che è passato comunque storpiato.
+
+Dopo ogni trascrizione, **proporre di aggiungere le voci nuove** comparse. Il glossario migliora da
+solo lezione dopo lezione ed è l'unica cosa che va curata a mano.
+
+## Stadio 3 — Elaborazione
+
+Leggere la trascrizione e produrre i materiali. Formati esatti in `references/formati-output.md`:
+leggerlo prima di scrivere il primo file.
+
+Cosa produrre, per tipo di corso:
+
+| Tipo di corso | Output utili | Output inutili |
 |---|---|---|
-| PC con GPU NVIDIA | `large-v3-turbo` | pochi minuti |
-| Solo CPU, si ha tempo | `large-v3-turbo` | da 20 min a oltre un'ora |
-| Solo CPU, serve in fretta | `small` | qualche minuto, più errori sui termini tecnici |
-
-Se il computer dell'utente non regge, o se vuole i nomi di chi parla (diarizzazione), l'alternativa
-è un servizio a pagamento: vedi `references/strumenti-pronti.md`.
-
-### Il glossario di corso: la cosa che cambia di più il risultato
-
-Whisper sbaglia sistematicamente i termini tecnici, i nomi propri e le sigle: "Lebesgue" diventa
-"le beg", "STM32" diventa "esse ti emme 32". Si risolve con un file `glossario.md` per corso, che
-lo script passa al modello come contesto iniziale.
-
-Alla prima lezione di un corso, crearlo insieme all'utente con i termini che già conosce dal
-programma. Dopo ogni trascrizione, **proporre di aggiungere i termini nuovi** che sono comparsi:
-il glossario migliora da solo lezione dopo lezione. Formato: una voce per riga, niente altro.
-
-```markdown
-# Glossario — Analisi Matematica II
-integrale di Lebesgue
-teorema di Fubini-Tonelli
-successione di Cauchy
-prof. Rossi
-```
-
-Vanno tenute le 50–80 voci più utili: il modello legge solo l'inizio del glossario, quindi mettere
-per prime le più frequenti e le più sbagliate.
-
-## Stadio 3 — Elaborazione (il lavoro vero)
-
-Leggere la trascrizione e produrre i materiali richiesti. Se l'utente non specifica cosa vuole,
-proporre riassunto + mappa e chiedere se servono anche flashcard e quiz.
-
-I formati esatti degli output stanno in `references/formati-output.md`: leggerlo prima di scrivere
-il primo file.
+| Progetto (moda, tessile, laboratorio) | riassunto, riferimenti, scadenze | flashcard, quiz |
+| Teorici (storia, semiotica, brand identity) | riassunto, mappa, flashcard, riferimenti | scadenze, se non ci sono consegne |
+| Tecnici (disegno, colore, software) | riassunto, glossario, riferimenti | flashcard, salvo nomenclatura da sapere a memoria |
 
 ### Regole che valgono per tutti gli output
 
-1. **Solo ciò che il docente ha detto.** Non integrare con conoscenza generale sull'argomento senza
-   dirlo. Se serve un'integrazione perché il passaggio è incomprensibile, marcarla:
-   `> [integrazione, non detto a lezione]`.
-2. **Timestamp come riferimento.** Ogni sezione del riassunto porta il timestamp da cui viene
-   `[00:14:30]`. Serve per riascoltare il punto quando il testo non basta, ed è la differenza tra
-   un riassunto utile e uno di cui non ci si fida.
-3. **Segnalare l'incerto.** Audio saltato, formula letta a voce, riferimento a una slide che non si
-   vede: marcarlo `⚠️ [audio poco chiaro, verificare]` invece di indovinare. Le formule dettate a
-   voce sono il caso più frequente: trascriverle in LaTeX e marcarle come da verificare.
-4. **Distinguere il peso.** Quando il docente dice "questo all'esame lo chiedo sempre", "questo
-   saltatelo", "questo è solo per curiosità", quell'informazione vale più del contenuto stesso:
-   raccoglierla in una sezione `## Segnalato dal docente`.
-5. **Niente riempitivi.** La trascrizione è parlato: ripetizioni, "allora", "ok ragazzi", aneddoti,
-   pause per le domande. Vanno via tutti, tranne le domande degli studenti che hanno avuto una
-   risposta di contenuto (quelle diventano una voce del riassunto).
+1. **Solo ciò che il docente ha detto.** Niente integrazioni con conoscenza generale sulla moda
+   senza dichiararle: `> [integrazione, non detta a lezione]`.
+2. **Timestamp come riferimento.** Ogni sezione porta il minuto da cui viene, `[00:14:30]`. È ciò
+   che permette di riascoltare e, nella biblioteca, di saltarci con un clic.
+3. **Legare parola e immagine.** Quando in quel punto esiste una schermata o una foto, citarne il
+   percorso nel riassunto. È l'unico modo per ricollegarle mesi dopo.
+4. **Mai inventare un nome.** Se il riferimento non è identificabile con certezza, riportarlo come
+   suonava e marcarlo `⚠️ da verificare`. Un designer sbagliato in una tesina è peggio di un buco.
+5. **Le consegne si riportano testuali**, con il minuto in cui sono state annunciate. Se non ne ha
+   dette, lasciare vuoto: non dedurle.
+6. **Niente riempitivi.** Via ripetizioni, "allora", aneddoti, pause. Restano le domande degli
+   studenti che hanno avuto una risposta di contenuto.
+7. **Correggere con il glossario.** Prima di scrivere, passare la trascrizione contro il
+   `glossario.md` del corso e sistemare i termini storpiati.
 
-### Lavorare su più lezioni insieme
+### Lavorare su più lezioni
 
-Quando l'utente chiede un riassunto del corso o prepara un esame, leggere i `riassunto.md` di tutte
-le lezioni della cartella corso (non le trascrizioni grezze, sono troppo lunghe) e produrre un
-`riassunto-corso.md` con la progressione degli argomenti e i collegamenti tra lezioni. Molte
-domande d'esame stanno esattamente lì, nei punti in cui il docente riprende un argomento vecchio.
+Per il quadro di un corso o la preparazione di un esame, leggere i `riassunto.md` e i
+`riferimenti.md` di tutte le lezioni (non le trascrizioni grezze, troppo lunghe) e produrre
+`quadro-corso.md`. I riferimenti che tornano in più lezioni sono quelli su cui il docente sta
+costruendo il corso.
 
 ## Stadio 4 — La biblioteca
-
-`scripts/biblioteca.py` apre nel browser tutto il materiale in un posto solo. Serve quando
-l'utente chiede dove finisce la roba, come la consulta, o dice che i file sparsi sono scomodi.
 
 ```bash
 .venv/bin/python scripts/biblioteca.py Lezioni/
 ```
 
-Legge la cartella così com'è, senza copiare né convertire niente, e la serve su
-`127.0.0.1`: le lezioni non escono dal computer.
+Apre tutto il materiale nel browser, su `127.0.0.1`: legge la cartella così com'è, non copia e non
+converte niente, e non espone nulla in rete. Solo libreria standard di Python, nessuna dipendenza.
 
-- **Indice** dei corsi e delle lezioni, con le pastiglie di cosa c'è e cosa manca ancora
-  (`manca riassunto`, `manca mappa`): è la lista delle cose da fare, visibile a colpo d'occhio.
-- **Pagina lezione** con il lettore audio in cima e una scheda per ogni materiale.
-- **Timestamp cliccabili ovunque.** È il motivo per cui l'interfaccia esiste: da `[00:23:10]` nel
-  riassunto o negli avvisi si salta a quel punto della registrazione. Il server risponde alle
-  richieste Range, quindi il salto è immediato anche su un file da due ore.
-- **Ricerca** su tutte le lezioni di tutti i corsi, con il risultato che porta al minuto giusto.
-- **Flashcard** sfogliabili con il retro nascosto, dallo stesso CSV che si importa in Anki.
+- **Indice** dei corsi con le pastiglie di cosa manca ancora: è la lista delle cose da fare.
+- **Pagina lezione** con lettore audio e una scheda per materiale.
+- **Galleria immagini** subito dopo il riassunto, perché in un corso di progetto le immagini sono
+  il contenuto. Raccoglie `schermate/` e `foto/`, in ordine di lezione. Le foto rinominate
+  `hh-mm-ss` diventano cliccabili sull'audio come le schermate.
+- **Timestamp cliccabili ovunque**: da `[00:23:10]` si salta a quel punto della registrazione. Il
+  server risponde alle richieste Range, quindi il salto è immediato anche su due ore di audio.
+- **Ricerca** su tutti i corsi, con il risultato che porta al minuto giusto. È il modo pratico per
+  rispondere a "chi era quel designer che aveva citato a ottobre".
 
-Gira con la sola libreria standard di Python: nessuna dipendenza da installare.
-
-Chi modifica il rendering o le rotte esegua poi `.venv/bin/python scripts/test_biblioteca.py`:
-monta un corpus finto, avvia il server e fa richieste HTTP vere, comprese quelle sull'audio.
+Chi modifica rendering o rotte esegua poi `.venv/bin/python scripts/test_biblioteca.py`: monta un
+corpus finto, avvia il server e fa richieste HTTP vere.
 
 ## Se l'utente non vuole installare niente
 
-Esiste la via senza codice: registrazione dal telefono e caricamento su una piattaforma che fa
-trascrizione ed elaborazione insieme. Confronto, limiti e quando conviene:
-`references/strumenti-pronti.md`. Il costo è che il materiale resta dentro la piattaforma e si
-elabora solo come decide lei.
+Esiste la via senza codice: registrazione dal telefono e caricamento su NotebookLM, che accetta
+anche i PDF delle slide. Confronto, limiti, e cosa fare quando non capisce un passaggio:
+`references/strumenti-pronti.md`.

@@ -8,35 +8,41 @@ Guida da usare quando l'utente chiede con cosa registrare o teme di perdersi dei
 voce del docente in modo più che sufficiente: Whisper regge rumore di fondo, colpi di tosse e
 banchi che cigolano. Quello che l'audio non conserva è tutto il resto:
 
-- **La lavagna e le slide.** Il docente scrive una formula e dice "questo qui è il termine che ci
-  interessa". Nella trascrizione resta "questo qui", e non significa niente.
-- **I gesti.** "Da qui a qui l'integrale cresce" indicando un grafico.
-- **La matematica letta a voce.** "a con n che tende a infinito" è ambiguo persino per una persona.
+- **Le immagini proiettate.** Collezioni, sfilate, archivi. Il docente dice "guardate questa
+  silhouette" e nella trascrizione resta "guardate questa silhouette", che non vale niente.
+- **I capi e i campioni.** Un tessuto che gira per l'aula si commenta a gesti: "sentite la mano",
+  "vedete come cade". Senza una foto, sparisce.
+- **I nomi.** Designer, maison, collezioni e stagioni escono storpiati dalla trascrizione, e un
+  nome sbagliato è peggio di un nome mancante perché non ci si accorge dell'errore.
+- **Le consegne dette a voce.** "Per la prossima volta tre tavole A3" non è scritto da nessuna
+  parte, e chi non l'ha sentito bene lo scopre alla revisione.
 - **Le domande dal fondo dell'aula.** Spesso inudibili; la risposta del docente resta monca.
 
-Nessun microfono migliore risolve questi quattro problemi. Si risolvono catturando anche il canale
-visivo, ed è esattamente il motivo per cui esiste `scripts/lezione_live.py`: avvisa nel momento in
-cui sta succedendo, così si fotografa la lavagna mentre è ancora scritta.
+Nessun microfono migliore risolve questi problemi. Si risolvono catturando anche il canale visivo,
+ed è esattamente il motivo per cui esiste `scripts/lezione_live.py`: avvisa nel momento in cui sta
+succedendo, così si fotografa mentre l'immagine è ancora proiettata e il campione è ancora in giro.
 
 ## Scala delle soluzioni, dal minimo al massimo
 
 **1. Telefono sul banco.** Gratis, sufficiente nella grande maggioranza dei casi. Microfono verso
 il docente, non coperto dalla mano né dentro lo zaino. Primi banchi se l'aula è grande.
 
-**2. Telefono più foto della lavagna.** Il salto di qualità più grande, e costa zero. Ogni volta
-che il docente scrive qualcosa, una foto. Il nome del file contiene già l'ora, quindi si allinea
-da sé con i timestamp della trascrizione.
+**2. Telefono più foto.** Il salto di qualità più grande, e costa zero. Una foto a ogni immagine
+proiettata, a ogni campione che passa, a ogni tavola commentata. Rinominandole `hh-mm-ss` compaiono
+nella galleria della biblioteca e diventano cliccabili sull'audio.
 
 **3. Microfono lavalier con clip.** Venti o trenta euro, jack o USB-C. Appoggiato sul bordo del
 banco davanti, non sul tavolo sotto il portatile. Serve davvero solo in aule molto grandi, molto
 riverberanti, o con un docente che parla piano o si muove continuamente.
 
 **4. Portatile con `lezione_live.py`.** Registrazione, trascrizione in diretta e avvisi su cosa
-fotografare. Consuma batteria, quindi meglio con alimentatore per lezioni lunghe.
+fotografare e su cosa è appena stato dato come consegna. Consuma batteria, quindi meglio con
+alimentatore per le lezioni lunghe. In laboratorio, dove ci si muove e ci si sporca le mani, il
+telefono con il bip è più pratico del portatile.
 
-**5. Lezione online.** Qui non si perde niente: audio pulito dalla sorgente e `--schermo` che
-salva l'inquadratura delle slide nel momento esatto in cui il docente le indica. È la
-configurazione in cui tutto questo rende al massimo.
+**5. Slide proiettate, con il portatile aperto.** Se le stesse slide sono anche sul proprio
+schermo, `--schermo` le salva nel momento esatto in cui il docente le commenta, e il problema
+principale sparisce da solo. Vale anche per le lezioni a distanza.
 
 ## Hardware, con i numeri
 

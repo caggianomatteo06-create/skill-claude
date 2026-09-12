@@ -19,13 +19,16 @@ spec.loader.exec_module(lv)
 # ---------- 1. Rilevatore ----------
 r = lv.Rilevatore()
 casi = [
-    ("Come vedete qui il grafico cresce", "visivo"),
-    ("Guardate questa formula sulla lavagna", "visivo"),
-    ("Questo qui è il termine che ci interessa", "visivo"),
-    ("Questo all'esame lo chiedo sempre", "esame"),
-    ("Mi raccomando, ricordatevi questa ipotesi", "esame"),
-    ("Come abbiamo visto la scorsa volta sul libro", "esterno"),
-    ("Trovate tutto sulle slide che vi ho caricato", "esterno"),
+    ("Come vedete qui la linea si allarga", "visivo"),
+    ("Guardate questo drappeggio", "visivo"),
+    ("Questo qui è il dettaglio che ci interessa", "visivo"),
+    ("Toccate la mano del tessuto", "visivo"),
+    ("Per la prossima volta portate tre tavole in formato A3", "consegna"),
+    ("La revisione è entro venerdì", "consegna"),
+    ("Dovete consegnare il figurino stampato", "consegna"),
+    ("Guardatevi la collezione autunno inverno 1997", "riferimento"),
+    ("Andate a vedere l'archivio di Vionnet", "riferimento"),
+    ("Come abbiamo visto la scorsa volta sulle slide", "riferimento"),
     ("Ci siamo? Domande?", "domanda"),
 ]
 for testo, atteso in casi:
@@ -35,16 +38,16 @@ for testo, atteso in casi:
 print(f"rilevatore: {len(casi)} frasi riconosciute")
 
 neutre = ["Allora ragazzi, oggi continuiamo il programma.",
-          "La definizione richiede che la funzione sia continua.",
-          "Prendiamo un numero reale positivo qualsiasi."]
+          "Il colore nasce dalla luce riflessa dalla superficie.",
+          "La moda del dopoguerra cambia insieme alla società."]
 for testo in neutre:
     assert not lv.Rilevatore().esamina(10.0, testo), f"falso positivo su {testo!r}"
 print(f"rilevatore: {len(neutre)} frasi neutre ignorate")
 
 r3 = lv.Rilevatore(silenzio=45.0)
-assert len(r3.esamina(10.0, "guardate qui")) == 1
-assert len(r3.esamina(20.0, "guardate qui")) == 0, "avviso ripetuto troppo presto"
-assert len(r3.esamina(70.0, "guardate qui")) == 1, "avviso mai più riemesso"
+assert len(r3.esamina(10.0, "guardate questo capo")) == 1
+assert len(r3.esamina(20.0, "guardate questo capo")) == 0, "avviso ripetuto troppo presto"
+assert len(r3.esamina(70.0, "guardate questo capo")) == 1, "avviso mai più riemesso"
 print("rilevatore: limite anti-raffica OK")
 
 assert [e.categoria for e in lv.Rilevatore().esamina(5.0, "parola", confidenza=-2.0)] == ["confidenza"]
@@ -129,10 +132,10 @@ print(f"sorgente file: {tot/lv.FREQUENZA:.1f}s di audio reale letti")
 dest = QUI.parent / ".prova-sessione"
 shutil.rmtree(dest, ignore_errors=True)
 sess = lv.Sessione(dest)
-sess.annota_parlato(65.0, "oggi parliamo di serie")
-sess.annota_evento(lv.Evento(72.0, "visivo", "guardate questa formula"))
+sess.annota_parlato(65.0, "oggi parliamo di taglio in sbieco")
+sess.annota_evento(lv.Evento(72.0, "visivo", "guardate questo drappeggio"))
 sess.annota_evento(lv.Evento(80.0, "confidenza", "brr frr"))
-assert "[00:01:05] oggi parliamo di serie" in (dest / "trascrizione-live.md").read_text()
+assert "[00:01:05] oggi parliamo di taglio in sbieco" in (dest / "trascrizione-live.md").read_text()
 avv = (dest / "avvisi.md").read_text()
 assert "**[00:01:12]** 📸" in avv and "**[00:01:20]** ⚠️" in avv, avv
 assert sess.riepilogo() == "1 confidenza, 1 visivo", sess.riepilogo()
@@ -146,10 +149,11 @@ class MessaggiFinti:
         risposta = types.SimpleNamespace(
             stop_reason="end_turn",
             content=[types.SimpleNamespace(type="text", text=json.dumps({
-                "da_catturare": ["la formula scritta alla lavagna al minuto 3"],
-                "termini_non_definiti": ["misura di Lebesgue"],
-                "domande_da_fare": ["Perché serve l'ipotesi di misurabilità?"],
-                "punti_deboli": [],
+                "da_fotografare": ["il capo mostrato al minuto 3, con il drappeggio in vita"],
+                "riferimenti_citati": ["Madeleine Vionnet, sbieco"],
+                "consegne_e_scadenze": ["tre tavole A3 per la revisione di venerdì"],
+                "termini_da_verificare": ["moulage"],
+                "domande_da_fare": ["Il moulage va fatto sul manichino o sulla persona?"],
             }))])
         return risposta
 class ClientFinto:
@@ -159,15 +163,15 @@ class ClientFinto:
 sys.modules["anthropic"] = types.SimpleNamespace(Anthropic=ClientFinto)
 
 ag = lv.AgenteClaude("claude-opus-5", 999, dest / "domande.md")
-ag._analizza([(120.0, "guardate questa formula"), (180.0, "la misura di Lebesgue")])
+ag._analizza([(120.0, "guardate questo drappeggio"), (180.0, "lo sbieco di Vionnet")])
 assert visto["model"] == "claude-opus-5"
 assert visto["betas"] == ["server-side-fallback-2026-07-01"] and visto["fallbacks"] == "default"
 assert visto["output_config"]["effort"] == "low"
 assert visto["output_config"]["format"]["schema"]["additionalProperties"] is False
-assert "[00:02:00] guardate questa formula" in visto["messages"][0]["content"]
+assert "[00:02:00] guardate questo drappeggio" in visto["messages"][0]["content"]
 testo = (dest / "domande.md").read_text()
-assert "Minuti 00:02:00 – 00:03:00" in testo and "misura di Lebesgue" in testo, testo
-assert ag.avvisi.qsize() == 3
+assert "Minuti 00:02:00 – 00:03:00" in testo and "Vionnet" in testo, testo
+assert ag.avvisi.qsize() == 5, ag.avvisi.qsize()
 print("agente: parametri API e file domande.md corretti")
 
 visto.clear()
@@ -188,12 +192,12 @@ print("agente: errore di rete non interrompe la sessione")
 # ---------- 6. esegui() end-to-end ----------
 shutil.rmtree(dest, ignore_errors=True)
 sess = lv.Sessione(dest)
-m4 = ModelloFinto([[Seg(1.0, 4.0, "guardate questa formula alla lavagna"),
-                    Seg(5.0, 9.0, "questo all'esame lo chiedo sempre")]])
+m4 = ModelloFinto([[Seg(1.0, 4.0, "guardate questo drappeggio"),
+                    Seg(5.0, 9.0, "per la prossima volta portate tre tavole")]])
 lv.esegui(lv.SorgenteFile(CAMPIONE, tempo_reale=False),
           lv.TrascrittoreFinestra(m4, finestra=25.0), sess, lv.Rilevatore(), None)
-assert [e.categoria for e in sess.eventi] == ["visivo", "esame"], sess.eventi
-assert "guardate questa formula" in (dest / "trascrizione-live.md").read_text()
+assert [e.categoria for e in sess.eventi] == ["visivo", "consegna"], sess.eventi
+assert "guardate questo drappeggio" in (dest / "trascrizione-live.md").read_text()
 print("esegui(): ciclo completo audio -> trascrizione -> avvisi OK")
 
 print("\nTUTTI I TEST DI lezione_live.py PASSATI")

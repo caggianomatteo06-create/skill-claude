@@ -21,19 +21,27 @@ with wave.open(str(lez / "audio.wav"), "wb") as w:
     w.writeframes((np.sin(np.arange(16000 * 4) * 0.05) * 8000).astype(np.int16).tobytes())
 (lez / "trascrizione.md").write_text(
     "# Trascrizione\n\n## [00:00:00]\n\nBuongiorno a tutti.\n\n## [00:05:00]\n\n"
-    "Il criterio del rapporto si applica cosi.\n", encoding="utf-8")
+    "Il taglio in sbieco di Vionnet cambia la caduta del tessuto.\n", encoding="utf-8")
 (lez / "riassunto.md").write_text(
-    "# Serie numeriche\n\n## Concetti\n\n### Criterio del rapporto [00:05:00]\n\n"
-    "Serve a **decidere** la convergenza.\n\n- primo punto\n  - punto annidato\n- `codice`\n\n"
-    "| Formula | Uso |\n|---|---|\n| $a_n$ | termine |\n\n> nota del docente\n", encoding="utf-8")
-(lez / "mappa.md").write_text("# Mappa\n\n## Convergenza\n- criterio del rapporto\n", encoding="utf-8")
+    "# Taglio in sbieco\n\n## Concetti\n\n### Lo sbieco [00:05:00]\n\n"
+    "Serve a **far cadere** il tessuto.\n\n- primo punto\n  - punto annidato\n- `Clo3D`\n\n"
+    "| Riferimento | Dove |\n|---|---|\n| Vionnet | archivio |\n\n> nota del docente\n",
+    encoding="utf-8")
+(lez / "mappa.md").write_text("# Mappa\n\n## Sbieco\n- caduta del tessuto\n", encoding="utf-8")
+(lez / "riferimenti.md").write_text(
+    "# Riferimenti\n\n| Chi o cosa | Minuto | Dove ritrovarlo |\n|---|---|---|\n"
+    "| Madeleine Vionnet | [00:05:00] | schermate/00-05-12.png |\n", encoding="utf-8")
+(lez / "scadenze.md").write_text(
+    "# Consegne\n\n- **Revisione 19/09**: tre tavole A3 stampate.\n", encoding="utf-8")
 (lez / "avvisi.md").write_text(
     "# Avvisi\n\n- **[00:05:12]** 📸 fotografa la lavagna\n  > guardate questa formula\n"
     "  ![schermata](schermate/00-05-12.png)\n", encoding="utf-8")
 (lez / "flashcard.csv").write_text(
-    '"Quando converge?","Se il rapporto tende a un limite < 1.","analisi2"\n'
-    '"Criterio inconcludente?","Quando il limite vale 1.","analisi2"\n', encoding="utf-8")
+    '"Chi introduce il taglio in sbieco?","Madeleine Vionnet, negli anni Venti.","storia"\n'
+    '"Cosa cambia lo sbieco?","La caduta e l\'elasticità del tessuto.","storia"\n', encoding="utf-8")
 (lez / "schermate" / "00-05-12.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"\0" * 40)
+(lez / "foto").mkdir()
+(lez / "foto" / "campione-lana.jpg").write_bytes(b"\xff\xd8\xff" + b"\0" * 40)
 vuota = radice / "Analisi II" / "2026-09-19-integrali"
 vuota.mkdir(); (vuota / "audio.m4a").write_bytes(b"\0" * 100)
 
@@ -44,15 +52,19 @@ assert [l.nome for l in corsi[0].lezioni] == ["2026-09-19-integrali", "2026-09-1
 piena = corsi[0].lezioni[1]
 assert piena.titolo == "serie numeriche" and piena.data == "2026-09-12"
 assert piena.audio.name == "audio.wav"
-assert set(piena.presenti) == {"trascrizione", "riassunto", "mappa", "avvisi", "flashcard"}
+assert set(piena.presenti) == {"trascrizione", "riassunto", "mappa", "avvisi",
+                               "flashcard", "riferimenti", "scadenze"}
 assert piena.mancanti == [], piena.mancanti
-assert corsi[0].lezioni[0].mancanti == ["trascrizione", "riassunto", "mappa", "flashcard"]
+assert corsi[0].lezioni[0].mancanti == ["trascrizione", "riassunto", "riferimenti"]
+# ordinate per minuto, le immagini senza orario nel nome in coda
+assert piena.immagini == [("schermate/00-05-12.png", 312),
+                          ("foto/campione-lana.jpg", None)], piena.immagini
 print("lettura cartelle: corsi, lezioni, materiali presenti e mancanti OK")
 
 # ---------- markdown ----------
 reso = bib.markdown((lez / "riassunto.md").read_text(), con_audio=True)
-assert "<h2>Serie numeriche</h2>" in reso and "<h4>Criterio del rapporto" in reso
-assert "<strong>decidere</strong>" in reso and "<code>codice</code>" in reso
+assert "<h2>Taglio in sbieco</h2>" in reso and "<h4>Lo sbieco" in reso
+assert "<strong>far cadere</strong>" in reso and "<code>Clo3D</code>" in reso
 assert reso.count("<ul>") == 2 and reso.count("</ul>") == 2, reso
 assert "<table>" in reso and "<blockquote>" in reso
 assert 'data-t="300"' in reso, "timestamp non cliccabile"
@@ -81,9 +93,21 @@ print("indice: elenco corsi e stato dei materiali OK")
 stato, _, corpo = prendi("/lezione/Analisi%20II/2026-09-12-serie-numeriche")
 testo = corpo.decode()
 assert stato == 200
-assert testo.count('data-scheda="') == 10, testo.count('data-scheda="')  # 5 bottoni + 5 sezioni
+# 7 materiali + la galleria, in bottoni e sezioni
+assert testo.count('data-scheda="') == 16, testo.count('data-scheda="')
+assert testo.index('data-scheda="immagini"') < testo.index('data-scheda="riferimenti"'), \
+    "la galleria deve stare subito dopo il riassunto"
+assert 'data-t="312"' in testo, "la schermata non è cliccabile sull'audio"
+# Le immagini vanno scaricate davvero: stanno in sottocartelle, e un percorso
+# annidato è esattamente il caso che un controllo sul solo HTML non vede.
+for dentro in ("schermate/00-05-12.png", "foto/campione-lana.jpg"):
+    indirizzo = f"/media/Analisi%20II/2026-09-12-serie-numeriche/{dentro}"
+    assert indirizzo in testo, dentro
+    stato_img, testa_img, dati = prendi(indirizzo)
+    assert stato_img == 200 and dati[:3] in (b"\x89PN", b"\xff\xd8\xff"), (dentro, stato_img)
+    assert testa_img["Content-Type"] in ("image/png", "image/jpeg"), testa_img["Content-Type"]
 assert "<audio controls" in testo and "audio.wav" in testo
-assert "Quando converge?" in testo and "Se il rapporto tende" in testo
+assert "Chi introduce il taglio in sbieco?" in testo and "anni Venti" in testo
 assert 'src="/media/Analisi%20II/2026-09-12-serie-numeriche/schermate/00-05-12.png"' in testo
 print("pagina lezione: schede, player, flashcard e immagini degli avvisi OK")
 
@@ -91,9 +115,9 @@ stato, _, corpo = prendi("/lezione/Analisi%20II/2026-09-19-integrali")
 assert stato == 200 and "solo l'audio" in corpo.decode()
 print("lezione con solo audio: indicato il passo successivo")
 
-stato, _, corpo = prendi("/cerca?q=rapporto")
+stato, _, corpo = prendi("/cerca?q=Vionnet")
 testo = corpo.decode()
-assert stato == 200 and "<mark>rapporto</mark>" in testo
+assert stato == 200 and "<mark>Vionnet</mark>" in testo
 assert "?t=300" in testo, "il risultato non porta al minuto giusto"
 assert "Nessun risultato" not in testo
 _, _, vuoto = prendi("/cerca?q=zzzinesistente")

@@ -80,8 +80,9 @@ audio non l'ho capito", e un "non è nelle fonti" non distingue fra *il docente 
 
 **Rimedi restando dentro la piattaforma:**
 
-- Aggiungere fonti invece di insistere sull'audio: il PDF delle slide, il capitolo del libro, gli
-  appunti presi a mano. Con più fonti che si sovrappongono, i buchi dell'audio si tappano da soli.
+- Aggiungere fonti invece di insistere sull'audio: il PDF delle slide del docente, il capitolo del
+  libro, gli appunti presi a mano. In un corso di moda è la mossa che conta di più, perché le slide
+  contengono i nomi scritti giusti, che l'audio non può dare.
 - Chiederglielo esplicitamente: *"quali passaggi delle fonti sono incoerenti o sembrano trascritti
   male?"*. Legge il testo, quindi sa rispondere.
 - Quello che non si può fare: correggere la trascrizione, o dargli un glossario che sistemi
@@ -89,7 +90,7 @@ audio non l'ho capito", e un "non è nelle fonti" non distingue fra *il docente 
 
 **Il rimedio vero è non dargli l'audio.** Dagli la trascrizione prodotta in locale:
 
-1. il glossario di corso corregge i termini tecnici *prima* che entrino nel testo;
+1. il glossario di corso corregge termini tecnici e nomi di designer *prima* che entrino nel testo;
 2. il file è dell'utente, quindi una sostituzione sistema tutte le occorrenze di un errore insieme;
 3. `avvisi.md` della modalità live indica già quali passaggi hanno confidenza bassa: si correggono
    quelli, non si rileggono due ore di trascrizione;

@@ -50,49 +50,56 @@ SOGLIA_CONFIDENZA = -0.9   # avg_logprob sotto il quale Whisper sta tirando a in
 CATEGORIE = {
     "visivo": {
         "emoji": "📸",
-        "azione": "il docente sta indicando qualcosa: fotografa la lavagna o lo schermo",
+        "azione": "il docente sta mostrando qualcosa: fotografalo adesso",
         "espressioni": [
             r"\bquest[oaie]\s+(?:qui|qua)\b",
-            r"\b(?:qui|qua)\s+(?:vedete|vedi|abbiamo|ho scritto|scrivo|c'è)\b",
-            r"\bcome\s+(?:vedete|potete vedere|si vede|vedi)\b",
+            r"\b(?:qui|qua)\s+(?:vedete|vedi|abbiamo|ho|si vede|c'è)\b",
+            r"\bcome\s+(?:vedete|potete vedere|si vede)\b",
             r"\b(?:guardate|osservate|notate)\b",
-            r"\bquest[ao]\s+(?:formula|grafico|slide|figura|tabella|schema|disegno|immagine|curva|matrice|equazione|espressione|funzione)\b",
-            r"\b(?:in|nella)\s+figura\b",
-            r"\b(?:sulla|alla)\s+lavagna\b",
-            r"\bquel(?:lo|la)?\s+(?:lì|là)\b",
-            r"\b(?:qui|qua)\s+(?:sopra|sotto)\b",
-            r"\b(?:a|sulla)\s+(?:sinistra|destra)\b",
             r"\bvi\s+(?:faccio|mostro)\s+vedere\b",
+            r"\bquest[ao]\s+(?:silhouette|linea|capo|abito|giacca|gonna|pantalone|drappeggio|"
+            r"tessuto|stampa|palette|tavola|immagine|foto|slide|figura|dettaglio|cucitura|volume|"
+            r"proporzione|texture|trama|armatura|modello|figurino|schizzo|campione|colore)\b",
+            r"\b(?:in|nella)\s+(?:questa\s+)?(?:immagine|foto|slide|figura)\b",
+            r"\b(?:a|sulla)\s+(?:sinistra|destra)\b",
+            r"\b(?:qui|qua)\s+(?:sopra|sotto)\b",
+            r"\bquel(?:lo|la)?\s+(?:lì|là)\b",
+            r"\b(?:toccate|sentite)\s+(?:la|il|questo|questa)\b",
+            r"\bmano\s+del\s+tessuto\b",
         ],
     },
-    "esame": {
-        "emoji": "⭐",
-        "azione": "segnalato per l'esame",
+    "consegna": {
+        "emoji": "📌",
+        "azione": "consegna o revisione: annota cosa e per quando",
         "espressioni": [
+            r"\bper\s+(?:la\s+)?prossima\s+(?:volta|lezione|settimana)\b",
+            r"\bconsegn(?:a|e|ate|are|erete|ata)\b",
+            r"\brevision[ei]\b",
+            r"\bportate\b",
+            r"\bentro\s+(?:il|la|lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\b",
+            r"\bdeadline\b",
+            r"\bscadenz\w+\b",
+            r"\bin\s+formato\s+\w+",
+            r"\b(?:stampate|presentate|appendete)\b",
+            r"\bdovete\s+(?:portare|consegnare|preparare|produrre|fare)\b",
+            r"\b(?:una|la|le|due|tre|quattro|cinque|sei)\s+tavol[ae]\b",
             r"\ball'?\s*esame\b",
-            r"\bin sede d'?esame\b",
-            r"\b(?:lo|la|questo|questa)\s+chiedo\s+sempre\b",
-            r"\bvi\s+chiederò\b",
-            r"\bdomanda\s+(?:classica|tipica|d'?esame|ricorrente)\b",
-            r"\b(?:è|e')\s+(?:fondamentale|importantissimo|essenziale)\b",
-            r"\bmi\s+raccomando\b",
-            r"\bricordate(?:vi)?\b",
-            r"\bdovete\s+saper(?:lo|la|e)\b",
         ],
     },
-    "esterno": {
-        "emoji": "📖",
-        "azione": "rimando a slide, libro o lezione precedente: recupera il materiale",
+    "riferimento": {
+        "emoji": "🔖",
+        "azione": "nome, collezione o fonte da recuperare dopo",
         "espressioni": [
+            r"\b(?:guardatevi|andate a vedere|cercate|documentatevi|studiatevi)\b",
+            r"\bcollezione\s+\w+",
+            r"\bsfilat[ae]\b",
+            r"\barchivio\b",
+            r"\b(?:autunno|inverno|primavera|estate)\s+\d{2,4}\b",
+            r"\bmostra\s+(?:al|alla|del|di|su)\b",
             r"\bcome\s+(?:abbiamo|avevamo)\s+(?:visto|detto)\b",
-            r"\bla\s+(?:scorsa|volta scorsa)\b",
-            r"\bsul\s+libro\b",
-            r"\bnel\s+capitolo\b",
-            r"\bcapitolo\s+\w+",
-            r"\besercizi(?:o)?\s+\w+",
-            r"\bsulle\s+slide\b",
             r"\bvi\s+ho\s+(?:caricato|messo)\b",
-            r"\bdispens[ae]\b",
+            r"\b(?:sulle\s+slide|sul\s+libro|nel\s+capitolo|dispens\w+)\b",
+            r"\b(?:Vogue|WGSN|Business of Fashion|Showstudio)\b",
         ],
     },
     "domanda": {
@@ -314,50 +321,59 @@ class TrascrittoreFinestra:
 # ---------------------------------------------------------------------------
 
 SISTEMA_AGENTE = """\
-Segui in diretta una lezione universitaria italiana. Ricevi la trascrizione \
-automatica degli ultimi minuti: è imperfetta, i termini tecnici possono essere \
-storpiati e le formule lette a voce sono spesso incomprensibili.
+Segui in diretta una lezione del triennio in Textile & Fashion Design allo IAAD di Torino. \
+Ricevi la trascrizione automatica degli ultimi minuti: è imperfetta, i termini tecnici e i nomi \
+dei designer vengono spesso storpiati.
 
-Il tuo compito non è riassumere. È accorgerti di cosa si sta perdendo chi ha \
-solo l'audio, mentre c'è ancora tempo per rimediare: lo studente è in aula e \
-può fotografare la lavagna o alzare la mano.
+È una lezione di progetto, quindi il contenuto sta soprattutto in ciò che il docente mostra: \
+immagini, capi, campioni di tessuto, tavole. L'audio da solo ne conserva pochissimo.
 
-Rispondi solo su ciò che è realmente nel testo. Se non c'è niente da segnalare, \
-restituisci liste vuote: è una risposta corretta e utile."""
+Il tuo compito non è riassumere. È accorgerti di cosa si sta perdendo, mentre c'è ancora tempo \
+per rimediare: lo studente è in aula e può fotografare, o alzare la mano.
+
+Rispondi solo su ciò che è realmente nel testo. Se non c'è niente da segnalare, restituisci liste \
+vuote: è una risposta corretta e utile."""
 
 SCHEMA_AGENTE = {
     "type": "object",
     "properties": {
-        "da_catturare": {
+        "da_fotografare": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "Cose citate che dal solo audio non si ricostruiscono: formule scritte, grafici, passaggi indicati a gesti. Una riga ciascuna, con la parola del docente che lo fa capire.",
+            "description": "Cose mostrate che dal solo audio non si ricostruiscono: immagini, capi, campioni, tavole, dettagli indicati a gesti. Una riga ciascuna, con la parola del docente che lo fa capire.",
         },
-        "termini_non_definiti": {
+        "riferimenti_citati": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "Termini tecnici usati come noti ma mai definiti in questo estratto.",
+            "description": "Designer, maison, collezioni, stagioni, mostre, libri o archivi nominati, da recuperare dopo. Riporta il nome come lo si cercherebbe, anche se la trascrizione lo storpia.",
+        },
+        "consegne_e_scadenze": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Cosa va consegnato o portato, in che formato e per quando. Solo se detto davvero.",
+        },
+        "termini_da_verificare": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Termini tecnici usati come noti ma mai definiti, e parole che la trascrizione ha palesemente storpiato.",
         },
         "domande_da_fare": {
             "type": "array",
             "items": {"type": "string"},
             "description": "Domande precise da rivolgere al docente adesso, non generiche.",
         },
-        "punti_deboli": {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "Passaggi in cui la trascrizione è incoerente o palesemente corrotta, da riascoltare.",
-        },
     },
-    "required": ["da_catturare", "termini_non_definiti", "domande_da_fare", "punti_deboli"],
+    "required": ["da_fotografare", "riferimenti_citati", "consegne_e_scadenze",
+                 "termini_da_verificare", "domande_da_fare"],
     "additionalProperties": False,
 }
 
 ETICHETTE_AGENTE = {
-    "da_catturare": "📸 da catturare",
-    "termini_non_definiti": "📖 termini mai definiti",
+    "da_fotografare": "📸 da fotografare",
+    "riferimenti_citati": "🔖 da recuperare",
+    "consegne_e_scadenze": "📌 consegne",
+    "termini_da_verificare": "⚠️ da verificare",
     "domande_da_fare": "❓ da chiedere al docente",
-    "punti_deboli": "⚠️ da riascoltare",
 }
 
 

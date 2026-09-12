@@ -35,14 +35,21 @@ ESTENSIONI_AUDIO = (".wav", ".m4a", ".mp3", ".ogg", ".opus", ".flac", ".mp4", ".
 
 MATERIALI = [
     ("riassunto", "riassunto.md", "Riassunto"),
+    ("riferimenti", "riferimenti.md", "Riferimenti"),
+    ("scadenze", "scadenze.md", "Consegne"),
     ("trascrizione", "trascrizione.md", "Trascrizione"),
     ("live", "trascrizione-live.md", "Diretta"),
     ("mappa", "mappa.md", "Mappa"),
     ("avvisi", "avvisi.md", "Avvisi"),
     ("domande", "domande.md", "Domande"),
-    ("quiz", "quiz.md", "Quiz"),
     ("flashcard", "flashcard.csv", "Flashcard"),
 ]
+
+# Cartelle in cui cercare le immagini della lezione: le schermate catturate dalla
+# modalità live e le foto scaricate dal telefono.
+CARTELLE_IMMAGINI = ("schermate", "foto")
+ESTENSIONI_IMMAGINE = (".png", ".jpg", ".jpeg", ".webp", ".gif")
+ORA_DA_NOME = re.compile(r"(\d{1,2})-([0-5]\d)-([0-5]\d)")
 
 
 @dataclass
@@ -81,11 +88,29 @@ class Lezione:
         }
 
     @property
+    def immagini(self) -> list[tuple[str, int | None]]:
+        """Percorsi relativi delle immagini, con il secondo ricavato dal nome file."""
+        trovate = []
+        for nome_cartella in CARTELLE_IMMAGINI:
+            cartella = self.cartella / nome_cartella
+            if not cartella.is_dir():
+                continue
+            for file in sorted(cartella.iterdir()):
+                if file.suffix.lower() not in ESTENSIONI_IMMAGINE:
+                    continue
+                ora = ORA_DA_NOME.search(file.stem)
+                istante = secondi(*ora.groups()) if ora else None
+                trovate.append((f"{nome_cartella}/{file.name}", istante))
+        # In ordine di lezione: prima quelle con un minuto nel nome, poi il resto.
+        trovate.sort(key=lambda v: (v[1] is None, v[1] if v[1] is not None else 0, v[0]))
+        return trovate
+
+    @property
     def mancanti(self) -> list[str]:
         presenti = self.presenti
-        # La diretta è alternativa alla trascrizione, non un materiale in più.
-        attesi = {"riassunto": "riassunto", "mappa": "mappa", "flashcard": "flashcard"}
-        manca = [e for c, e in attesi.items() if c not in presenti]
+        # Solo i tre materiali che servono a tutti i corsi: mappe, flashcard e
+        # consegne dipendono dal corso, segnalarle come mancanti sarebbe rumore.
+        manca = [e for e in ("riassunto", "riferimenti") if e not in presenti]
         if "trascrizione" not in presenti and "live" not in presenti:
             manca.insert(0, "trascrizione")
         return manca
@@ -240,6 +265,24 @@ def markdown(testo: str, con_audio: bool = False, base: str = "") -> str:
     return "\n".join(fuori)
 
 
+def galleria_html(immagini: list[tuple[str, int | None]], base: str, con_audio: bool) -> str:
+    pezzi = ['<p class="nota">Immagini della lezione. Metti qui anche le foto '
+             'della lavagna e dei campioni: se le rinomini <code>hh-mm-ss</code> '
+             'diventano cliccabili sull\'audio.</p><div class="galleria">']
+    for relativo, istante in immagini:
+        indirizzo = base + urllib.parse.quote(relativo)
+        didascalia = ""
+        if istante is not None:
+            marca = f"[{istante // 3600:02d}:{(istante % 3600) // 60:02d}:{istante % 60:02d}]"
+            didascalia = (f'<a class="t" href="#" data-t="{istante}">{marca}</a>'
+                          if con_audio else f"<span class='tenue'>{marca}</span>")
+        pezzi.append(f'<figure><a href="{indirizzo}" target="_blank">'
+                     f'<img src="{indirizzo}" alt="{esc(relativo)}" loading="lazy"></a>'
+                     f"<figcaption>{didascalia}</figcaption></figure>")
+    pezzi.append("</div>")
+    return "".join(pezzi)
+
+
 def flashcard_html(percorso: Path) -> str:
     righe = []
     with percorso.open(encoding="utf-8", newline="") as f:
@@ -312,6 +355,12 @@ code { background:var(--evidenza); padding:1px 5px; border-radius:4px; font-size
 .scorri { overflow-x:auto; }
 table { border-collapse:collapse; width:100%; font-size:14px; }
 td { border:1px solid var(--bordo); padding:7px 10px; vertical-align:top; }
+.galleria { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); }
+.galleria figure { margin:0; }
+.galleria img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:8px;
+  border:1px solid var(--bordo); display:block; }
+.galleria figcaption { margin-top:5px; font-size:13px; }
+.nota { color:var(--tenue); font-size:14px; }
 .carta { border:1px solid var(--bordo); border-radius:10px; padding:12px 14px; margin:10px 0; }
 .carta .fronte { font-weight:600; }
 .carta .retro { margin-top:8px; color:var(--tenue); }
@@ -405,17 +454,30 @@ def pagina_lezione(lezione: Lezione) -> bytes:
         testa.append(f'<div class="barra"><audio controls preload="metadata" '
                      f'src="{base}{urllib.parse.quote(audio.name)}"></audio></div>')
 
-    schede, sezioni = [], []
-    for chiave, nome, etichetta in MATERIALI:
+    voci: list[tuple[str, str, str]] = []
+    for chiave, _nome, etichetta in MATERIALI:
         percorso = presenti.get(chiave)
         if not percorso:
             continue
-        primo = not schede
         if chiave == "flashcard":
             contenuto = flashcard_html(percorso)
         else:
             contenuto = markdown(percorso.read_text(encoding="utf-8"),
                                  con_audio=audio is not None, base=base)
+        voci.append((chiave, etichetta, contenuto))
+
+    # In un corso di progetto le immagini sono il contenuto, non un allegato:
+    # la galleria sta subito dopo il riassunto.
+    immagini = lezione.immagini
+    if immagini:
+        galleria = ("immagini", f"Immagini ({len(immagini)})",
+                    galleria_html(immagini, base, con_audio=audio is not None))
+        dopo_riassunto = 1 if voci and voci[0][0] == "riassunto" else 0
+        voci.insert(dopo_riassunto, galleria)
+
+    schede, sezioni = [], []
+    for chiave, etichetta, contenuto in voci:
+        primo = not schede
         schede.append(f'<button data-scheda="{chiave}" aria-selected="{str(primo).lower()}">'
                       f'{esc(etichetta)}</button>')
         sezioni.append(f'<section class="scheda" data-scheda="{chiave}"'
@@ -501,8 +563,10 @@ class Gestore(BaseHTTPRequestHandler):
                 if not cartella or not cartella.is_dir():
                     return self._errore(404, "Lezione non trovata")
                 return self._html(pagina_lezione(Lezione(cartella, parti[1])))
-            if parti[0] == "media" and len(parti) == 4:
-                file = self._dentro_radice(self.radice / parti[1] / parti[2] / parti[3])
+            # Le immagini stanno in sottocartelle (schermate/, foto/), quindi il
+            # percorso dopo la lezione può avere più di un livello.
+            if parti[0] == "media" and len(parti) >= 4:
+                file = self._dentro_radice(self.radice.joinpath(*parti[1:]))
                 if not file or not file.is_file():
                     return self._errore(404, "File non trovato")
                 return self._file(file)
