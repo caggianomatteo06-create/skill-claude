@@ -212,6 +212,32 @@ le lezioni della cartella corso (non le trascrizioni grezze, sono troppo lunghe)
 `riassunto-corso.md` con la progressione degli argomenti e i collegamenti tra lezioni. Molte
 domande d'esame stanno esattamente lì, nei punti in cui il docente riprende un argomento vecchio.
 
+## Stadio 4 — La biblioteca
+
+`scripts/biblioteca.py` apre nel browser tutto il materiale in un posto solo. Serve quando
+l'utente chiede dove finisce la roba, come la consulta, o dice che i file sparsi sono scomodi.
+
+```bash
+.venv/bin/python scripts/biblioteca.py Lezioni/
+```
+
+Legge la cartella così com'è, senza copiare né convertire niente, e la serve su
+`127.0.0.1`: le lezioni non escono dal computer.
+
+- **Indice** dei corsi e delle lezioni, con le pastiglie di cosa c'è e cosa manca ancora
+  (`manca riassunto`, `manca mappa`): è la lista delle cose da fare, visibile a colpo d'occhio.
+- **Pagina lezione** con il lettore audio in cima e una scheda per ogni materiale.
+- **Timestamp cliccabili ovunque.** È il motivo per cui l'interfaccia esiste: da `[00:23:10]` nel
+  riassunto o negli avvisi si salta a quel punto della registrazione. Il server risponde alle
+  richieste Range, quindi il salto è immediato anche su un file da due ore.
+- **Ricerca** su tutte le lezioni di tutti i corsi, con il risultato che porta al minuto giusto.
+- **Flashcard** sfogliabili con il retro nascosto, dallo stesso CSV che si importa in Anki.
+
+Gira con la sola libreria standard di Python: nessuna dipendenza da installare.
+
+Chi modifica il rendering o le rotte esegua poi `.venv/bin/python scripts/test_biblioteca.py`:
+monta un corpus finto, avvia il server e fa richieste HTTP vere, comprese quelle sull'audio.
+
 ## Se l'utente non vuole installare niente
 
 Esiste la via senza codice: registrazione dal telefono e caricamento su una piattaforma che fa

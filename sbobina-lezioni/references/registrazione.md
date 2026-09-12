@@ -38,8 +38,34 @@ fotografare. Consuma batteria, quindi meglio con alimentatore per lezioni lunghe
 salva l'inquadratura delle slide nel momento esatto in cui il docente le indica. È la
 configurazione in cui tutto questo rende al massimo.
 
-Il registratore digitale dedicato non entra in questa scala: costa più del lavalier e, per una
-lezione trascritta automaticamente, non aggiunge nulla che conti.
+## Hardware, con i numeri
+
+Prima dei modelli, il fatto che decide tutto: **conta la distanza dalla sorgente più di qualunque
+microfono**. Il livello della voce cala con il quadrato della distanza, mentre il riverbero
+dell'aula resta costante. Dimezzare la distanza vale più di duecento euro di attrezzatura.
+Spostarsi dalla nona alla terza fila è l'upgrade più economico che esista.
+
+Detto questo, quando il telefono non basta davvero:
+
+| Categoria | Esempi | Prezzo | Quando serve |
+|---|---|---|---|
+| Lavalier con filo | Boya BY-M1, Rode SmartLav+ | 20–70 € | Aula grande: si appoggia sul bordo del banco davanti |
+| Lavalier wireless | Hollyland Lark M2, DJI Mic Mini, DJI Mic 2 | 140–300 € | Solo se il docente accetta di indossare il trasmettitore |
+| Registratore dedicato | Zoom H1essential, Tascam DR-05XP, Sony ICD-PX370 | 60–150 € | Aule molto riverberanti, o per non impegnare il telefono |
+| Registratore con AI | Plaud Note e simili | 150–200 € | Trascrive e riassume da sé, ma richiude il dato dentro il suo servizio |
+
+Cosa cambia davvero con un registratore dedicato: microfoni migliori dei capsuli di un telefono,
+preamplificatori più silenziosi, dinamica più larga, autonomia da una giornata intera, e nessuna
+notifica o telefonata che interrompe la registrazione. È un guadagno reale ma **incrementale**:
+migliora il rapporto segnale-rumore, non riporta indietro la lavagna.
+
+Il wireless è la soluzione tecnicamente migliore e praticamente più difficile: chiede di
+consegnare un trasmettitore al docente a ogni lezione. Vale la pena solo con un docente
+disponibile e un corso lungo.
+
+**Ordine in cui spendere, dal più redditizio:** sedersi davanti (gratis), fotografare la lavagna
+(gratis), lavalier con filo, registratore dedicato, wireless. Chi salta i primi due e compra il
+quinto ha speso male i suoi soldi.
 
 ## Errori pratici che costano una lezione intera
 
