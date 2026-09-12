@@ -60,6 +60,44 @@ Un semestre serio sono circa 300 ore di lezione: fra i 35 e i 110 dollari all'an
 cambio di non far girare niente sul proprio computer. I servizi a pagamento aggiungono però la
 diarizzazione e vanno molto più veloci di una CPU.
 
+## Quando lo strumento a valle non capisce
+
+Domanda che arriva presto: e se NotebookLM (o qualunque altro) non capisce un passaggio?
+
+Quasi sempre non è lui a non capire. NotebookLM è **ancorato alle fonti**: ogni affermazione che
+produce è legata a un passaggio preciso del materiale che gli hai dato, e se la risposta non è
+nelle fonti dice che non la trova invece di inventarla. Il che significa che capisce benissimo
+quello che gli arriva. Se gli è arrivata una trascrizione storpiata dell'audio, cita fedelmente
+una frase storpiata, con la stessa sicurezza di una giusta.
+
+**Il controllo che hai dall'interno**: le citazioni. Clicca su una frase del riassunto e guarda il
+passaggio della fonte da cui viene. Se quel passaggio è incomprensibile, hai trovato il problema.
+È l'unico segnale disponibile, e va usato su tutto ciò che si intende studiare davvero.
+
+**Il segnale che non hai**: nessun avviso di bassa confidenza. Non esiste un "questo pezzo di
+audio non l'ho capito", e un "non è nelle fonti" non distingue fra *il docente non l'ha detto* e
+*l'ho trascritto male*.
+
+**Rimedi restando dentro la piattaforma:**
+
+- Aggiungere fonti invece di insistere sull'audio: il PDF delle slide, il capitolo del libro, gli
+  appunti presi a mano. Con più fonti che si sovrappongono, i buchi dell'audio si tappano da soli.
+- Chiederglielo esplicitamente: *"quali passaggi delle fonti sono incoerenti o sembrano trascritti
+  male?"*. Legge il testo, quindi sa rispondere.
+- Quello che non si può fare: correggere la trascrizione, o dargli un glossario che sistemi
+  "le beg" in "Lebesgue". Il testo è dentro la piattaforma e non si tocca.
+
+**Il rimedio vero è non dargli l'audio.** Dagli la trascrizione prodotta in locale:
+
+1. il glossario di corso corregge i termini tecnici *prima* che entrino nel testo;
+2. il file è dell'utente, quindi una sostituzione sistema tutte le occorrenze di un errore insieme;
+3. `avvisi.md` della modalità live indica già quali passaggi hanno confidenza bassa: si correggono
+   quelli, non si rileggono due ore di trascrizione;
+4. il testo pesa molto meno dell'audio e sta comodamente nei limiti di fonti del piano gratuito.
+
+La regola generale da trasmettere: ogni strumento a valle vale quanto il testo che riceve.
+La fatica va spesa una volta sola sulla trascrizione, non ripetuta a ogni elaborazione.
+
 ## Cosa consigliare, in pratica
 
 1. **Per iniziare stasera, senza installare niente**: registratore del telefono, poi il file audio
