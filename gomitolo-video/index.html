@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Gomitolo Milano Londra</title>
+<style>
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant.woff2) format("woff2"); font-style: normal; }
+  @font-face { font-family: "Cormorant"; src: url(fonts/cormorant-italic.woff2) format("woff2"); font-style: italic; }
+  @font-face { font-family: "InterL"; src: url(fonts/Inter-Regular.otf); font-weight: 400; }
+  @font-face { font-family: "InterL"; src: url(fonts/Inter-Medium.otf); font-weight: 500; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #1c2118; }
+  #stage { position: absolute; inset: 0; }
+  canvas#gl { position: absolute; inset: 0; filter: contrast(1.06) saturate(1.06) brightness(1.01); }
+  #grain { position: absolute; inset: 0; width: 1920px; height: 1080px; opacity: 0.07; mix-blend-mode: overlay; image-rendering: auto; }
+  #vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 48%, rgba(0,0,0,0) 52%, rgba(0,0,0,0.42) 100%); }
+  .ui { position: absolute; color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.5); }
+  .title { left: 120px; bottom: 150px; opacity: 0; }
+  .title .city { font-family: "Cormorant"; font-weight: 500; font-size: 150px; letter-spacing: 0.06em; line-height: 0.9; }
+  .title .sub { font-family: "Cormorant"; font-style: italic; font-size: 54px; margin-top: 14px; }
+  .title .coord { font-family: "InterL"; font-size: 20px; letter-spacing: 0.32em; margin-top: 22px; opacity: 0.85; }
+  .title .rule { width: 90px; height: 2px; background: #c8a24a; margin: 26px 0 0; }
+  #counter { right: 110px; bottom: 96px; text-align: right; opacity: 0; }
+  #counter .num { font-family: "Cormorant"; font-size: 84px; font-variant-numeric: tabular-nums lining-nums; line-height: 1; }
+  #counter .num small { font-size: 40px; margin-left: 10px; font-style: italic; }
+  #counter .lbl { font-family: "InterL"; font-size: 17px; letter-spacing: 0.34em; text-transform: uppercase; margin-top: 10px; opacity: 0.85; }
+  #place { left: 110px; top: 92px; opacity: 0; }
+  #place .k { font-family: "InterL"; font-weight: 500; font-size: 16px; letter-spacing: 0.4em; text-transform: uppercase; color: #e9d39a; }
+  #place .n { font-family: "Cormorant"; font-style: italic; font-size: 56px; margin-top: 6px; }
+  #credits { left: 0; right: 0; bottom: 22px; text-align: center; font-family: "InterL"; font-size: 13px; letter-spacing: 0.06em; opacity: 0.6; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="1920" height="1080"></canvas>
+  <div id="vignette"></div>
+  <canvas id="grain" width="960" height="540"></canvas>
+  <div class="ui title" id="titleStart">
+    <div class="city">MILANO</div>
+    <div class="sub">Brera</div>
+    <div class="rule"></div>
+    <div class="coord">45.4720° N &nbsp; 9.1880° E</div>
+  </div>
+  <div class="ui title" id="titleEnd">
+    <div class="city">LONDON</div>
+    <div class="sub">Harrods, Knightsbridge</div>
+    <div class="rule"></div>
+    <div class="coord" id="endCoord">51.4994° N &nbsp; 0.1632° W &nbsp;·&nbsp; 1.307 KM DI FILO</div>
+  </div>
+  <div class="ui" id="place"><div class="k" id="placeK"></div><div class="n" id="placeN"></div></div>
+  <div class="ui" id="counter"><div class="num"><span id="km">0</span><small>km</small></div><div class="lbl">di filo srotolato</div></div>
+  <div class="ui" id="credits">Immagini satellitari © Esri, Maxar, Earthstar Geographics · Altimetria: AWS Terrain Tiles · Percorso: OSRM, © OpenStreetMap contributors</div>
+</div>
+<script type="importmap">{ "imports": { "three": "./node_modules/three/build/three.module.js", "three/addons/": "./node_modules/three/examples/jsm/" } }</script>
+<script type="module" src="scene.js"></script>
+</body>
+</html>
