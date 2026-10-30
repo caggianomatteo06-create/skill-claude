@@ -23,6 +23,11 @@ del terreno in 3D e 7 inquadrature con cambi di camera.
   Terrarium (esagerata ×1,9 nelle viste larghe), gomitolo procedurale (24 bande × 7
   fili in tubi con texture a 3 capi e sheen da tessuto), filo ricostruito a ogni
   fotogramma, ombre, nebbia atmosferica, titoli e contachilometri.
+- `prep_buildings.py` + `city.js`: città in 3D a Milano (Brera) e Londra
+  (Knightsbridge). Sagome e altezze reali degli edifici OSM dalle tessere vettoriali
+  OpenFreeMap; dove OSM non ha l'altezza viene stimata (5–8 piani). Tetti con la foto
+  satellitare reale, facciate con finestre procedurali (persiane verdi a Milano,
+  finestre a ghigliottina e mattoni a Londra), occlusione ambientale alla base e ombre.
 - `server.py`: server statico con cache locale delle tessere.
 - `render.mjs`: Chromium headless → ffmpeg (H.264).
 
@@ -31,6 +36,7 @@ del terreno in 3D e 7 inquadrature con cambi di camera.
 ```bash
 npm install
 python3 prep_route.py
+pip install mapbox-vector-tile shapely && python3 prep_buildings.py
 python3 server.py 8765 &
 node render.mjs out/seg_0.mp4 0 300 & node render.mjs out/seg_300.mp4 300 600 & node render.mjs out/seg_600.mp4 600 900
 ```
@@ -38,4 +44,4 @@ node render.mjs out/seg_0.mp4 0 300 & node render.mjs out/seg_300.mp4 300 600 & 
 Poi si concatenano i segmenti con ffmpeg (`-f concat`).
 
 Crediti: immagini © Esri, Maxar, Earthstar Geographics · altimetria AWS Terrain Tiles ·
-percorso OSRM, © OpenStreetMap contributors.
+percorso OSRM, edifici OpenFreeMap/OpenMapTiles, © OpenStreetMap contributors.

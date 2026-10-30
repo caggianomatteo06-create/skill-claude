@@ -9,7 +9,7 @@ export const MERC_TILE = 156543.03392804097; // mercator meters per pixel at z0
 // Ball: physical radius at start, fraction of its volume unwound by Harrods,
 // on-screen radius used once the camera is far enough that the real ball
 // would vanish (keeps the ball readable at continental scale).
-export const BALL_R0 = 4.0;
+export const BALL_R0 = 3.0;
 export const BALL_UNWOUND = 0.72;
 export const BALL_HERO_PX = 38;
 export const THREAD_RATIO = 0.055; // yarn radius / ball radius
@@ -127,11 +127,11 @@ export function makeCamera(P) {
       tilt = lerp(0, 10, smooth(u)); heading = H0 + lerp(-25, -8, smooth(u)); leadPx = 90 * smooth(u);
     } else if (t < 7.0) { // 2. low chase camera through Milan streets
       shot = 2; const u = (t - 3.6) / 3.4;
-      dist = lerp(70, 85, smooth(u)); tilt = lerp(62, 56, u);
-      heading = travelHeading(s, 25) + lerp(38, 12, smooth(u)); leadPx = 40;
+      dist = lerp(150, 175, smooth(u)); tilt = lerp(26, 42, smooth(u));
+      heading = travelHeading(s, 25) + lerp(14, 4, smooth(u)); leadPx = 40;
     } else if (t < 11.0) { // 3. crane up from street to region
       shot = 3; const u = (t - 7.0) / 4.0, e = smoother(u);
-      dist = lerpLog(85, 620000, smooth(Math.min(1, u * 1.05))); tilt = lerp(56, 0, smooth(u * 1.3));
+      dist = lerpLog(175, 620000, smooth(Math.min(1, u * 1.05))); tilt = lerp(42, 0, smooth(u * 1.3));
       const th = travelHeading(s, Math.max(12, mppAt(dist, fov) * 120));
       heading = lerp(th + 12, unwrap(-20, th), e); leadPx = lerp(40, 160, e);
     } else if (t < 15.5) { // 4. oblique orbit over the Alps (Mont Blanc)

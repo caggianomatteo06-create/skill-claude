@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { Path, simulate, W, H, FPS, MERC_TILE, THREAD_RATIO, smooth } from './timeline.js';
+import { buildCity } from './city.js';
 
 const ER = 6378137, HALF = Math.PI * ER;
 const MAX_Z = 19, DEM_MAX_Z = 11, GRID = 24;
@@ -29,7 +30,7 @@ const hemi = new THREE.HemisphereLight(0xe6edf5, 0x5a5040, 0.62 * Math.PI);
 scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff1dc, 0.50 * Math.PI);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(4096, 4096);
 sun.shadow.radius = 4;
 scene.add(sun, sun.target);
 
@@ -434,6 +435,14 @@ frames.forEach((f, i) => { const p = frames[Math.max(0, i - 1)]; f.speedKm = Mat
 await document.fonts.ready;
 await Promise.all(['150px Cormorant', 'italic 54px Cormorant', '20px InterL', '500 16px InterL'].map((f) => document.fonts.load(f)));
 
+// 3D buildings around the start (Brera) and the finish (Harrods)
+const cities = await Promise.all([
+  buildCity('milano', [P.x[0], P.y[0]], maxAniso),
+  buildCity('london', [P.x[P.n - 1], P.y[P.n - 1]], maxAniso),
+]);
+cities.forEach((c) => scene.add(c.group));
+const CITY_MAX_MPP = 14;
+
 const exagFor = (mpp) => 1.9 * smooth((Math.log10(mpp) - Math.log10(4)) / (Math.log10(120) - Math.log10(4)));
 
 window.renderFrame = async function renderFrame(fi) {
@@ -480,13 +489,24 @@ window.renderFrame = async function renderFrame(fi) {
   scene.fog.near = fr.dist * (1.3 + 2 * (1 - Math.sin(tr)));
   scene.fog.far = fr.dist * (6 + 10 * (1 - Math.sin(tr)));
 
-  // sun + shadow volume around the ball
-  sun.position.copy(ballC).addScaledVector(SUN, R * 20);
-  sun.target.position.copy(ballC);
+  // city blocks: placed relative to the floating origin, hidden when too far up
+  let cityOn = false;
+  for (const c of cities) {
+    const near = fr.mpp < CITY_MAX_MPP && Math.hypot(c.ox - O.x, c.oy - O.y) < 30000;
+    c.group.visible = near;
+    if (near) { cityOn = true; c.group.position.set(c.ox - O.x, elevation(c.ox, c.oy, dz) * secLat(c.oy) * ex, -(c.oy - O.y)); }
+  }
+
+  // sun + shadow volume: around the ball, or the whole view when buildings are up
+  const E = cityOn ? Math.max(R * 4, Math.min(fr.mpp * W * 0.75 * (1 + 1.5 * Math.sin(tr)), 1400)) : R * 4;
+  const shC = cityOn ? new THREE.Vector3(0, ballC.y, 0).lerp(ballC, 0.5) : ballC;
+  const lightD = Math.max(R * 20, E * 2 + 300);
+  sun.position.copy(shC).addScaledVector(SUN, lightD);
+  sun.target.position.copy(shC);
   const sc = sun.shadow.camera;
-  sc.left = -R * 4; sc.right = R * 4; sc.top = R * 4; sc.bottom = -R * 4; sc.near = R * 5; sc.far = R * 40;
+  sc.left = -E; sc.right = E; sc.top = E; sc.bottom = -E; sc.near = lightD * 0.2; sc.far = lightD * 2;
   sc.updateProjectionMatrix();
-  sun.shadow.bias = -0.0004; sun.shadow.normalBias = R * 0.01;
+  sun.shadow.bias = -0.0004; sun.shadow.normalBias = Math.max(R * 0.01, E / 4096);
 
   const t0 = performance.now();
   const nt = await buildTiles(O, ex);

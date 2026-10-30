@@ -1,0 +1,6 @@
+frame 600 shot 5 tiles 111  14.37s/f  eta 71.6 min
+frame 601 shot 5 tiles 112  9.70s/f  eta 48.2 min
+frame 602 shot 5 tiles 112  7.94s/f  eta 39.3 min
+frame 603 shot 5 tiles 112  7.10s/f  eta 35.0 min
+frame 604 shot 5 tiles 112  6.59s/f  eta 32.4 min
+frame 605 shot 5 tiles 114  6.56s/f  eta 32.2 min

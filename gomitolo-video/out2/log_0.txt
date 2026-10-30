@@ -1,0 +1,7 @@
+frame 0 shot 1 tiles 12  8.36s/f  eta 41.6 min
+frame 1 shot 1 tiles 12  6.28s/f  eta 31.2 min
+frame 2 shot 1 tiles 12  5.86s/f  eta 29.0 min
+frame 3 shot 1 tiles 12  5.71s/f  eta 28.2 min
+frame 4 shot 1 tiles 12  5.79s/f  eta 28.5 min
+frame 5 shot 1 tiles 12  5.85s/f  eta 28.6 min
+frame 6 shot 1 tiles 12  5.99s/f  eta 29.2 min
