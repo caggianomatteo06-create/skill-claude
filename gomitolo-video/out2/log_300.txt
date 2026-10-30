@@ -1,5 +1,0 @@
-frame 300 shot 3 tiles 118  14.49s/f  eta 72.2 min
-frame 301 shot 3 tiles 134  10.08s/f  eta 50.0 min
-frame 302 shot 3 tiles 152  8.60s/f  eta 42.6 min
-frame 303 shot 3 tiles 170  8.04s/f  eta 39.7 min
-frame 304 shot 3 tiles 191  7.63s/f  eta 37.5 min
