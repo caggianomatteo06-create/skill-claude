@@ -149,9 +149,9 @@ export function makeCamera(P) {
     } else { // 7. descent onto Knightsbridge and Harrods
       shot = 7; const u = clamp((t - 24.5) / 2.9, 0, 1), e = smoother(u), v = smooth((t - 27.4) / 2.6);
       dist = t < 27.4 ? lerpLog(300000, distFor(0.13, fov), smooth(u)) : lerp(distFor(0.13, fov), distFor(0.115, fov), v);
-      tilt = lerp(50, 0, smooth(u * 1.15)) + 8 * v;
+      tilt = (t < 27.4 ? lerp(50, 30, smooth(u * 1.15)) : 30) + 6 * v;
       const th = travelHeading(s, Math.max(20, mppAt(dist, fov) * 100));
-      heading = lerp(th, unwrap(HEND - 90, th), smooth(u * 1.25)) + 8 * v;
+      heading = lerp(th, unwrap(HEND - 30, th), smooth(u * 1.25)) + 8 * v;
       leadPx = lerp(80, 45, e);
     }
     const mpp = mppAt(dist, fov);

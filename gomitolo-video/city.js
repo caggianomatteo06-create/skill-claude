@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 
 const ER = 6378137, HALF = Math.PI * ER;
+const HARRODS = [ER * (-0.16295 * Math.PI / 180), ER * Math.log(Math.tan(Math.PI / 4 + (51.49905 * Math.PI / 180) / 2))];
 
 const PALETTES = {
   // ochre, cream, terracotta plaster typical of central Milan
@@ -111,6 +112,8 @@ export async function buildCity(name, core, maxAniso) {
     }
     h *= sec; mh *= sec;
     const col = pal[Math.floor(hash(bi * 7.1) * pal.length)].clone().multiplyScalar(0.92 + hash(bi * 3.3) * 0.12);
+    // Harrods' terracotta facade
+    if (name === 'london' && Math.hypot(cx - HARRODS[0] + ox, cy - HARRODS[1] + oy) < 95 * sec) col.set('#b3654a');
 
     b.r.forEach((ring, ri) => {
       const n = ring.length / 2;
